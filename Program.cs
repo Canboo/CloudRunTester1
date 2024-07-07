@@ -1,4 +1,13 @@
+using api.Models;
+using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddSingleton<SecretManagerService>();
+var secretManagerService = new SecretManagerService();
+string connectionString = await secretManagerService.GetConnectionStringAsync("976669534422");
+
+builder.Services.AddDbContext<ApiContext>(opt => { opt.UseSqlServer(connectionString); });
 
 // Add services to the container.
 

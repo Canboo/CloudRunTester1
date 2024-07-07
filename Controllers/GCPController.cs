@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Google.Cloud.SecretManager.V1;
+using api.Models;
+using Microsoft.EntityFrameworkCore;
 
 
 namespace api.Controllers;
@@ -8,9 +10,11 @@ namespace api.Controllers;
 [Route("[controller]")]
 public class GCPController : ControllerBase
 {
-    public GCPController()
+    private readonly ApiContext db;
+    public GCPController(ApiContext db)
     {
         _client = SecretManagerServiceClient.Create();
+        this.db = db;
     }
 
     private readonly SecretManagerServiceClient _client;
@@ -38,5 +42,13 @@ public class GCPController : ControllerBase
             // 返回错误信息
             return StatusCode(500, $"Error accessing secret: {ex.Message}");
         }
+    }
+
+    /// <summary>嘗試取出 Cloud SQL For MSSQL 資料表</summary>
+    /// <response code="204">新增成功</response>
+    [HttpGet("/CloudSQL")]
+    public async Task<ActionResult<IEnumerable<TaiwanCity>>> GetSQL()
+    {
+        return await db.TaiwanCities.ToListAsync();
     }
 }
