@@ -3,9 +3,27 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
+ConfigurationManager Configuration = builder.Configuration;
+
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(
+        builder =>
+        {
+            builder
+                .SetIsOriginAllowed(origin => true)
+                .AllowCredentials()
+                .AllowAnyHeader()
+                .AllowAnyMethod()
+                .WithExposedHeaders("Content-Disposition");
+        });
+});
+
 builder.Services.AddSingleton<SecretManagerService>();
 var secretManagerService = new SecretManagerService();
-string connectionString = await secretManagerService.GetConnectionStringAsync("976669534422");
+string connectionString = await secretManagerService.GetConnectionStringAsync(
+    Configuration.GetSection("GCP:ProjectId").Get<string>()
+);
 
 builder.Services.AddDbContext<ApiContext>(opt => { opt.UseSqlServer(connectionString); });
 
@@ -24,6 +42,8 @@ var app = builder.Build();
 app.UseSwagger();
 app.UseSwaggerUI();
 // }
+
+app.UseCors();
 
 app.UseHttpsRedirection();
 

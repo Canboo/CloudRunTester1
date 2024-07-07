@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Google.Cloud.SecretManager.V1;
 using api.Models;
 using Microsoft.EntityFrameworkCore;
-
+using Microsoft.AspNetCore.Http;
 
 namespace api.Controllers;
 
@@ -24,14 +24,13 @@ public class GCPController : ControllerBase
     /// <param name="secretName">請輸入密鑰名稱</param>
     /// <response code="204">新增成功</response>
     [HttpGet("/SecretManager/{projectId}/{secretName}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> GetSecret(string projectId, string secretName)
     {
         try
         {
-            // 设置要访问的 secret 资源名称
-            SecretVersionName secretVersionName = new SecretVersionName(projectId, secretName, "latest");
-
-            // 访问 secret 并获取其值
+            SecretVersionName secretVersionName = new(projectId, secretName, "latest");
             AccessSecretVersionResponse result = await _client.AccessSecretVersionAsync(secretVersionName);
             string secretValue = result.Payload.Data.ToStringUtf8();
 
