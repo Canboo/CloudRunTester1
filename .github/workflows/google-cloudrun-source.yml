@@ -26,7 +26,7 @@ jobs:
         with:
           service: ${{ vars.CLOUDRUN_NAME }}
           region: ${{ vars.CLOUDRUN_REGION }}
-          flags: '--ingress=all'
+          flags: '--allow-unauthenticated'
           source: ./
 
       # If required, use the Cloud Run url output in later steps
