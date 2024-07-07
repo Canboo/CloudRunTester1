@@ -18,12 +18,29 @@ public class SecretManagerService
         return result.Payload.Data.ToStringUtf8();
     }
 
-    public async Task<string> GetConnectionStringAsync(string projectId)
+    public async Task<string> GetConnectionStringAsync(string projectId, string host = "")
     {
-        string dbhost = await GetSecretAsync(projectId, "dbhost");
-        string dbname = await GetSecretAsync(projectId, "dbname");
-        string dbuser = await GetSecretAsync(projectId, "dbuser");
-        string dbpassword = await GetSecretAsync(projectId, "dbpassword");
+        var tasks = new List<Task<string>>();
+
+        if (string.IsNullOrEmpty(host))
+        {
+            tasks.Add(GetSecretAsync(projectId, "dbhost"));
+        }
+        else
+        {
+            tasks.Add(Task.FromResult(host));
+        }
+
+        tasks.Add(GetSecretAsync(projectId, "dbname"));
+        tasks.Add(GetSecretAsync(projectId, "dbuser"));
+        tasks.Add(GetSecretAsync(projectId, "dbpassword"));
+
+        var results = await Task.WhenAll(tasks);
+
+        string dbhost = results[0];
+        string dbname = results[1];
+        string dbuser = results[2];
+        string dbpassword = results[3];
 
         return $"server={dbhost};Database={dbname};MultipleActiveResultSets=true;TrustServerCertificate=true;UID={dbuser};PWD={dbpassword};";
     }

@@ -22,7 +22,8 @@ builder.Services.AddCors(options =>
 builder.Services.AddSingleton<SecretManagerService>();
 var secretManagerService = new SecretManagerService();
 string connectionString = await secretManagerService.GetConnectionStringAsync(
-    Configuration.GetSection("GCP:ProjectId").Get<string>()
+    Configuration.GetSection("GCP:ProjectId").Get<string>(),
+    Configuration.GetSection("GCP:DatabaseIp").Get<string>()
 );
 
 builder.Services.AddDbContext<ApiContext>(opt => { opt.UseSqlServer(connectionString); });
