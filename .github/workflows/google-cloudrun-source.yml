@@ -23,7 +23,6 @@ jobs:
         with:
           service_account: 'github-to-cloudrun@nycu-osa-uat.iam.gserviceaccount.com'
           workload_identity_provider: 'projects/668790833830/locations/global/workloadIdentityPools/github-actions-pool/providers/nycu-uat-repo'
-          token_format: 'access_token'
 
       - name: Deploy to Cloud Run
         id: deploy
