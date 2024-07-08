@@ -21,14 +21,15 @@ jobs:
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
         with:
-          project_id: ${{ secrets.GCP_PROJECT_ID }}
-          credentials_json: ${{ secrets.GCP_SA_KEY }}
+          service_account: 'github-to-cloudrun@nycu-osa-uat.iam.gserviceaccount.com'
+          workload_identity_provider: 'projects/668790833830/locations/global/workloadIdentityPools/github-actions-pool/providers/nycu-uat-repo'
+          token_format: 'access_token'
 
       - name: Deploy to Cloud Run
         id: deploy
         uses: google-github-actions/deploy-cloudrun@v2.6.0
         with:
-          service: poctest
+          service: ${{ vars.CLOUDRUN_NAME }}
           region: ${{ vars.CLOUDRUN_REGION }}
           flags: '--allow-unauthenticated'
           source: ./
