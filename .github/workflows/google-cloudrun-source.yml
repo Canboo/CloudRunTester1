@@ -17,8 +17,8 @@ jobs:
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
         with:
-          project_id: ${{ secrets.GCP_PROJECT_ID }}
-          credentials_json: ${{ secrets.GCP_SA_KEY }}
+          service_account: ${{ secrets.POC_CLOUDRUNAPI_SEC_OSA_UAT }}
+          workload_identity_provider: ${{ secrets.POC_CLOUDRUNAPI_PROJECTS668790833830 }}
 
       - name: Deploy to Cloud Run
         id: deploy
