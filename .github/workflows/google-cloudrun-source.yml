@@ -10,6 +10,10 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+    
     steps:
       - name: Checkout code
         uses: actions/checkout@v4.1.5
@@ -19,6 +23,7 @@ jobs:
         with:
           service_account: ${{ secrets.POC_CLOUDRUNAPI_SEC_OSA_UAT }}
           workload_identity_provider: ${{ secrets.POC_CLOUDRUNAPI_PROJECTS668790833830 }}
+          token_format: 'access_token'
 
       - name: Deploy to Cloud Run
         id: deploy
