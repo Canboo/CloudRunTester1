@@ -29,7 +29,7 @@ jobs:
         id: deploy
         uses: google-github-actions/deploy-cloudrun@v2.6.0
         with:
-          service: 'PocCloudRunAPI'
+          service: 'poccloudrunapi'
           region: 'asia-east1'
           flags: '--allow-unauthenticated'
           source: ./
