@@ -32,7 +32,7 @@ jobs:
           service: 'poccloudrunapi'
           region: 'asia-east1'
           flags: '--allow-unauthenticated'
-          source: ./
+          source: .
 
       # If required, use the Cloud Run url output in later steps
       - name: Show Output
