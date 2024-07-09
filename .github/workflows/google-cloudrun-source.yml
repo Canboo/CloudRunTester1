@@ -9,11 +9,11 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    
+
     permissions:
       contents: 'read'
       id-token: 'write'
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4.1.5
@@ -21,8 +21,9 @@ jobs:
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
         with:
-          project_id: 'nycu-osa-uat'
-          credentials_json: ${{ secrets.GCP_SA_KEY }}
+          service_account: ${{ secrets.POC_CLOUDRUNAPI_SEC_OSA_UAT }}
+          workload_identity_provider: ${{ secrets.POC_CLOUDRUNAPI_PROJECTS668790833830 }}
+          token_format: 'access_token'
 
       - name: Deploy to Cloud Run
         id: deploy
@@ -31,7 +32,7 @@ jobs:
           service: 'poccloudrunapi'
           region: 'asia-east1'
           flags: '--allow-unauthenticated'
-          source: .
+          source: ./
 
       # If required, use the Cloud Run url output in later steps
       - name: Show Output
