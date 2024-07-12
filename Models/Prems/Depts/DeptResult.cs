@@ -2,12 +2,12 @@ using System.Text.Json.Serialization;
 
 namespace api.Models;
 
-public class DeptResult
+public class DeptResult(string error)
 {
     /// <summary>
     /// 計數
     /// </summary>
-    public int Count { get; set; }
+    public int Count { get; set; } = 0;
 
     /// <summary>
     /// 資料
@@ -17,7 +17,7 @@ public class DeptResult
     /// <summary>
     /// 錯誤訊息
     /// </summary>
-    public string Error { get; set; }
+    public string Error { get; set; } = error;
 }
 
 public class DeptData

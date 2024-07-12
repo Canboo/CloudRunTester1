@@ -4,9 +4,6 @@ using api.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Http;
 using Google.Cloud.Storage.V1;
-using Google.Cloud.Functions.V2;
-using Google.Api.Gax.ResourceNames;
-using Google.LongRunning;
 
 namespace api.Controllers;
 
@@ -14,33 +11,11 @@ namespace api.Controllers;
 [Route("[controller]")]
 public class GCPController(ApiContext db, IConfiguration configuration, DeptHelper publisher) : ControllerBase
 {
-    private readonly FunctionServiceClient _function = FunctionServiceClient.Create();
     private readonly IConfiguration _configuration = configuration;
     private readonly ApiContext db = db;
     private readonly DeptHelper publisher = publisher;
     private readonly SecretManagerServiceClient _client = SecretManagerServiceClient.Create();
     private readonly StorageClient _storageClient = StorageClient.Create();
-
-    /// <summary>嘗試取出 Secret Manager 的設定值</summary>
-    [HttpGet("/Functions")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> GetFunctions()
-    {
-        try
-        {
-            FunctionServiceClient functionServiceClient = await FunctionServiceClient.CreateAsync();
-            FunctionName parent = new("668790833830", "asia-east1", "pocfunctiondep");
-            Function response = functionServiceClient.GetFunction(parent);
-
-            return Ok(response);
-        }
-        catch (Exception ex)
-        {
-            // 返回错误信息
-            return StatusCode(500, $"Error accessing secret: {ex.Message}");
-        }
-    }
 
     /// <summary>嘗試取出 Secret Manager 的設定值</summary>
     /// <param name="projectId">請輸入專案Id</param>

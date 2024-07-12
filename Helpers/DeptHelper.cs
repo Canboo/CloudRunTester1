@@ -1,3 +1,4 @@
+using System.Net.Http.Headers;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
@@ -31,10 +32,14 @@ public class DeptHelper(HttpClient httpClient, IMemoryCache memoryCache, IOption
         string memoryKey = $"PremDept-{entity.DepYear}";
         if (!memoryCache.TryGetValue(memoryKey, out DeptResult data))
         {
+            var token = await new TokenHelper().Create(settings.Value.DeptDomain);
+            if (!string.IsNullOrEmpty(token.Error)) return new DeptResult(token.Error);
+
             var req = new StringContent(JsonConvert.SerializeObject(entity, JsonSettings), Encoding.UTF8, "application/json");
 
             var uri = new Uri(settings.Value.DeptDomain);
             if (Client.BaseAddress != uri) Client.BaseAddress = uri;
+            Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token.Token);
 
             var result = await Client.PostAsync("", req);
             try
@@ -48,11 +53,7 @@ public class DeptHelper(HttpClient httpClient, IMemoryCache memoryCache, IOption
             }
             catch (Exception ex)
             {
-                return new DeptResult
-                {
-                    Count = 0,
-                    Error = ex.Message
-                };
+                return new DeptResult(ex.Message);
             }
         }
 
