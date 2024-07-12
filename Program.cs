@@ -37,6 +37,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.Configure<PremSystem>(Configuration.GetSection("PremSystem"));
 builder.Services.AddHttpClient()
     .AddHttpClient<DeptHelper>();
+builder.Services.AddMemoryCache();
 
 var app = builder.Build();
 

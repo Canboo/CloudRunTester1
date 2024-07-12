@@ -1,13 +1,15 @@
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 
 namespace api.Helpers;
 
-public class DeptHelper(HttpClient httpClient, IOptions<PremSystem> settings)
+public class DeptHelper(HttpClient httpClient, IMemoryCache memoryCache, IOptions<PremSystem> settings)
 {
     public HttpClient Client { get; private set; } = httpClient;
     private readonly IOptions<PremSystem> settings = settings;
+    private readonly IMemoryCache memoryCache = memoryCache;
     private readonly JsonSerializerSettings JsonSettings = new()
     {
         ContractResolver = new CamelCasePropertyNamesContractResolver()
@@ -26,23 +28,34 @@ public class DeptHelper(HttpClient httpClient, IOptions<PremSystem> settings)
     /// </summary>
     private async Task<DeptResult> SendPost(DeptQuery entity)
     {
-        var req = new StringContent(JsonConvert.SerializeObject(entity, JsonSettings), Encoding.UTF8, "application/json");
-
-        var uri = new Uri(settings.Value.DeptDomain);
-        if (Client.BaseAddress != uri) Client.BaseAddress = uri;
-
-        var data = await Client.PostAsync("", req);
-        try
+        string memoryKey = $"PremDept-{entity.DepYear}";
+        if (!memoryCache.TryGetValue(memoryKey, out DeptResult data))
         {
-            return data.Content.ReadFromJsonAsync<DeptResult>().Result;
-        }
-        catch (Exception ex)
-        {
-            return new DeptResult
+            var req = new StringContent(JsonConvert.SerializeObject(entity, JsonSettings), Encoding.UTF8, "application/json");
+
+            var uri = new Uri(settings.Value.DeptDomain);
+            if (Client.BaseAddress != uri) Client.BaseAddress = uri;
+
+            var result = await Client.PostAsync("", req);
+            try
             {
-                Count = 0,
-                Error = ex.Message
-            };
+                data = result.Content.ReadFromJsonAsync<DeptResult>().Result;
+                // 寫進緩存
+                memoryCache.Set(memoryKey, data, new MemoryCacheEntryOptions
+                {
+                    AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(300)
+                });
+            }
+            catch (Exception ex)
+            {
+                return new DeptResult
+                {
+                    Count = 0,
+                    Error = ex.Message
+                };
+            }
         }
+
+        return data;
     }
 }
