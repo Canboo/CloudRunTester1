@@ -9,25 +9,17 @@ namespace api.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class GCPController : ControllerBase
+public class GCPController(ApiContext db, IConfiguration configuration, DeptHelper publisher) : ControllerBase
 {
-    private readonly IConfiguration _configuration;
-    private readonly ApiContext db;
-    public GCPController(ApiContext db, IConfiguration configuration)
-    {
-        _client = SecretManagerServiceClient.Create();
-        _storageClient = StorageClient.Create();
-        this.db = db;
-        _configuration = configuration;
-    }
-
-    private readonly SecretManagerServiceClient _client;
-    private readonly StorageClient _storageClient;
+    private readonly IConfiguration _configuration = configuration;
+    private readonly ApiContext db = db;
+    private readonly DeptHelper publisher = publisher;
+    private readonly SecretManagerServiceClient _client = SecretManagerServiceClient.Create();
+    private readonly StorageClient _storageClient = StorageClient.Create();
 
     /// <summary>嘗試取出 Secret Manager 的設定值</summary>
     /// <param name="projectId">請輸入專案Id</param>
     /// <param name="secretName">請輸入密鑰名稱</param>
-    /// <response code="204">新增成功</response>
     [HttpGet("/SecretManager/{projectId}/{secretName}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -49,7 +41,6 @@ public class GCPController : ControllerBase
     }
 
     /// <summary>嘗試取出 Cloud SQL For MSSQL 資料表</summary>
-    /// <response code="204">新增成功</response>
     [HttpGet("/CloudSQL")]
     public async Task<ActionResult<IEnumerable<TaiwanCity>>> GetSQL()
     {
@@ -80,5 +71,12 @@ public class GCPController : ControllerBase
         {
             return NotFound(e.Message);
         }
+    }
+
+    /// <summary>嘗試透過 Cloud Functions 取出地端 vw_StuAffairs_sysDep 資料表</summary>
+    [HttpPost("/Depts")]
+    public async Task<ActionResult<DeptResult>> GetDepts(DeptQuery query)
+    {
+        return await publisher.Create(query);
     }
 }
